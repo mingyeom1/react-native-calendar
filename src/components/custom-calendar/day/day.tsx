@@ -2,7 +2,7 @@ import dayjs, {Dayjs} from 'dayjs'
 import React, {useMemo} from 'react'
 import {Text, View} from 'react-native'
 import {CustomPressable} from '~/components/custom-pressable/custom-pressable'
-import styles from './custom-calendar-day.styles'
+import styles from './day.styles'
 
 interface Props {
   date: Dayjs
@@ -10,7 +10,7 @@ interface Props {
   currentDate: Dayjs
   onPressDay: (date: Dayjs) => void
 }
-export const CustomCalendarDay = ({date, isCurrentMonth, currentDate, onPressDay}: Props) => {
+export const Day = ({date, isCurrentMonth, currentDate, onPressDay}: Props) => {
   const dateString = useMemo(() => date?.format('YYYY-MM-DD'), [date])
 
   const isSelected = useMemo(() => dateString === currentDate.format('YYYY-MM-DD'), [currentDate, dateString])

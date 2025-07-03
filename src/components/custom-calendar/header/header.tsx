@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import React from 'react'
 import {Image, Text, View} from 'react-native'
 import {CustomPressable} from '~/components/custom-pressable/custom-pressable'
-import styles from './calendar-header.styles'
+import styles from './header.styles'
 
 interface Props {
   month: dayjs.Dayjs
@@ -10,7 +10,7 @@ interface Props {
   onNext: () => void
 }
 
-export const CalendarHeader = ({month, onNext, onPrev}: Props) => {
+export const Header = ({month, onNext, onPrev}: Props) => {
   return (
     <View style={styles.container}>
       <CustomPressable onPress={onPrev} throttleDisabled>

@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: pixelRatio(36),
     height: DAY_HEIGHT,
-    borderRadius: pixelRatio(100),
+    borderRadius: pixelRatio(18),
   },
 })
 

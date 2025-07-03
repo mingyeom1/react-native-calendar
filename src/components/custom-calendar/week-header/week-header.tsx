@@ -1,10 +1,10 @@
 import React from 'react'
 import {Text, View} from 'react-native'
-import styles from './custom-calendar-week-header.styles'
+import styles from './week-header.styles'
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 
-export const CustomCalendarWeekHeader = () => {
+export const WeekHeader = () => {
   return (
     <View style={styles.weekContainer}>
       {DAYS.map((day) => (

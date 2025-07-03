@@ -1,24 +1,23 @@
 import {Dayjs} from 'dayjs'
 import React from 'react'
-import Animated, {interpolate, SharedValue, useAnimatedStyle} from 'react-native-reanimated'
-import {CALENDAR_HEADER_HEIGHT} from '../calendar-header/calendar-header.styles'
-import {CustomCalendarDay} from '../custom-calendar-day/custom-calendar-day'
-import {DAY_HEIGHT} from '../custom-calendar-day/custom-calendar-day.styles'
-import {WEEK_HEADER_HEIGHT_HEIGHT} from '../custom-calendar-week-header/custom-calendar-week-header.styles'
+import Animated, {interpolate, useAnimatedStyle} from 'react-native-reanimated'
 import {useViewModel} from '../custom-calendar.hook'
+import {Day} from '../day/day'
+import {DAY_HEIGHT} from '../day/day.styles'
+import {CALENDAR_HEADER_HEIGHT} from '../header/header.styles'
+import {WEEK_HEADER_HEIGHT_HEIGHT} from '../week-header/week-header.styles'
 import styles from './week.styles'
 
 interface Props {
-  viewModel: ReturnType<typeof useViewModel>
+  index: number
   week: {
     date: Dayjs
     isCurrentMonth: boolean
   }[]
-  index: number
-  dragY: SharedValue<number>
+  viewModel: ReturnType<typeof useViewModel>
 }
 
-export const Week = ({viewModel, week, index, dragY}: Props) => {
+export const Week = ({viewModel, week, index}: Props) => {
   const style = useAnimatedStyle(() => {
     if (index === viewModel.selectedWeekIndex) {
       return {
@@ -28,13 +27,13 @@ export const Week = ({viewModel, week, index, dragY}: Props) => {
     } else {
       return {
         height: interpolate(
-          dragY.value,
+          viewModel.dragY.value,
           [0, viewModel.FULL_HEIGHT - DAY_HEIGHT - CALENDAR_HEADER_HEIGHT - WEEK_HEADER_HEIGHT_HEIGHT],
           [DAY_HEIGHT, 0],
           'clamp',
         ),
         opacity: interpolate(
-          dragY.value,
+          viewModel.dragY.value,
           [0, viewModel.FULL_HEIGHT - DAY_HEIGHT - CALENDAR_HEADER_HEIGHT - WEEK_HEADER_HEIGHT_HEIGHT],
           [1, 0],
           'clamp',
@@ -46,7 +45,7 @@ export const Week = ({viewModel, week, index, dragY}: Props) => {
   return (
     <Animated.View key={index} style={[styles.row, style]}>
       {week.map(({date, isCurrentMonth}, _index) => (
-        <CustomCalendarDay
+        <Day
           key={_index}
           currentDate={viewModel.selectedDate}
           date={date}
