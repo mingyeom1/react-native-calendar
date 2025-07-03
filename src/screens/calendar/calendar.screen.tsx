@@ -5,7 +5,7 @@ import styles from './calendar.styles'
 
 export const CalendarScreen = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <CustomCalendar />
     </SafeAreaView>
   )

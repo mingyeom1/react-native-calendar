@@ -1,98 +1,56 @@
-import dayjs, {Dayjs} from 'dayjs'
-import React, {useCallback, useMemo, useState} from 'react'
-import {View} from 'react-native'
+import React, {Fragment} from 'react'
+import {Gesture, GestureDetector} from 'react-native-gesture-handler'
+import Animated, {useAnimatedStyle, useSharedValue} from 'react-native-reanimated'
 import {CalendarHeader} from './calendar-header/calendar-header'
-import {CustomCalendarDay} from './custom-calendar-day/custom-calendar-day'
-import {CustomCalendarWeek} from './custom-calendar-week/custom-calendar-week'
+import {CustomCalendarWeekHeader} from './custom-calendar-week-header/custom-calendar-week-header'
+import {useViewModel} from './custom-calendar.hook'
 import styles from './custom-calendar.styles'
+import {Week} from './week/week'
 
-interface Props {
-  onPressDay?: (date: Dayjs) => void
-  nextDate?: string
-}
+export const CustomCalendar = () => {
+  const viewModel = useViewModel()
 
-export const CustomCalendar = (props: Props) => {
-  const [selectedDate, setSelectedDate] = useState(dayjs())
-  const [month, setMonth] = useState(dayjs())
+  const dragY = useSharedValue(0)
+  const startY = useSharedValue(0)
 
-  const days = useMemo(() => {
-    const start = month.startOf('month')
-    const end = month.endOf('month')
-    const totalDays = end.date()
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      startY.value = dragY.value
+    })
+    .onUpdate((e) => {
+      dragY.value = Math.min(viewModel.MAX_DRAG, Math.max(0, startY.value - e.translationY))
+    })
 
-    const startWeek = start.day()
-
-    const prevMonth = month.subtract(1, 'month')
-    const nextMonth = month.add(1, 'month')
-    const daysInPrevMonth = prevMonth.endOf('month').date()
-
-    const result: {
-      date: Dayjs
-      isCurrentMonth: boolean
-    }[] = []
-
-    for (let i = startWeek - 1; i >= 0; i--) {
-      const date = prevMonth.date(daysInPrevMonth - i)
-      result.push({date, isCurrentMonth: false})
+  const gestureAreaStyle = useAnimatedStyle(() => {
+    return {
+      flex: 1,
+      backgroundColor: 'white',
+      height: dragY.value,
+      borderTopColor: '#dddddd',
+      borderTopWidth: 1,
     }
+  })
 
-    for (let d = 1; d <= totalDays; d++) {
-      const date = month.date(d)
-      result.push({date, isCurrentMonth: true})
+  const calendarStyle = useAnimatedStyle(() => {
+    return {
+      height: viewModel.FULL_HEIGHT - dragY.value,
+      overflow: 'hidden',
     }
-
-    const filled = result.length
-    const shouldFillTo = filled <= 35 ? 35 : 42
-
-    const remaining = shouldFillTo - filled
-    for (let i = 1; i <= remaining; i++) {
-      const date = nextMonth.date(i)
-      result.push({date, isCurrentMonth: false})
-    }
-
-    return result
-  }, [month])
-
-  const onPressDay = useCallback((date: Dayjs) => {
-    setSelectedDate(date)
-  }, [])
-
-  const onNextMonth = useCallback(() => setMonth((prevMonth) => prevMonth.add(1, 'month')), [])
-  const onPrevMonth = useCallback(() => setMonth((prevMonth) => prevMonth.subtract(1, 'month')), [])
-
-  const weeks = useMemo(() => {
-    const result: {date: Dayjs; isCurrentMonth: boolean}[][] = []
-
-    for (let i = 0; i < days.length; i += 7) {
-      result.push(days.slice(i, i + 7))
-    }
-
-    return result
-  }, [days])
+  })
 
   return (
-    <View>
-      <View style={styles.calendar}>
-        <CalendarHeader month={month} onNext={onNextMonth} onPrev={onPrevMonth} />
-        <CustomCalendarWeek />
+    <Fragment>
+      <Animated.View style={[styles.calendar, calendarStyle]}>
+        <CalendarHeader month={viewModel.month} onNext={viewModel.onNextMonth} onPrev={viewModel.onPrevMonth} />
+        <CustomCalendarWeekHeader />
 
-        {weeks.map((week, weekIndex) => (
-          <View key={weekIndex} style={[styles.row, weekIndex !== weeks.length - 1 && {marginBottom: 8}]}>
-            {week.map(({date, isCurrentMonth}, index) => (
-              <CustomCalendarDay
-                key={index}
-                currentDate={selectedDate}
-                date={date}
-                isCurrentMonth={isCurrentMonth}
-                onPressDay={() => {
-                  onPressDay(date)
-                  props.onPressDay?.(date)
-                }}
-              />
-            ))}
-          </View>
+        {viewModel.weeks.map((week, weekIndex) => (
+          <Week key={weekIndex} index={weekIndex} viewModel={viewModel} week={week} dragY={dragY} />
         ))}
-      </View>
-    </View>
+      </Animated.View>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={gestureAreaStyle} />
+      </GestureDetector>
+    </Fragment>
   )
 }
